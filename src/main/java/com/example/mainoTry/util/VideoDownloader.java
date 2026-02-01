@@ -10,6 +10,11 @@ public class VideoDownloader {
         try (InputStream in = new URL(url).openStream();
              FileOutputStream out = new FileOutputStream(temp)) {
             in.transferTo(out);
+        } catch (IOException e) {
+            if (temp.exists()) {
+                temp.delete(); // Cleanup on failure to release disk space
+            }
+            throw e; // Bubble up the exception
         }
         return temp;
     }

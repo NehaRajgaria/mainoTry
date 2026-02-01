@@ -11,7 +11,7 @@ import java.util.concurrent.*;
 public class JobService {
 
     private final Map<String, UploadJob> jobs = new ConcurrentHashMap<>();
-    private final ExecutorService executor = Executors.newFixedThreadPool(5);
+    private final ExecutorService executor = Executors.newCachedThreadPool();
     private final YouTubeUploadService uploadService;
 
     public JobService(YouTubeUploadService uploadService) {
@@ -31,7 +31,12 @@ public class JobService {
         job.status = JobStatus.IN_PROGRESS;
 
         for (VideoTask task : job.videos) {
-            uploadService.upload(task);
+            int retryLimit = 3, retries = 0;
+            while (retries < retryLimit) {
+                uploadService.upload(task);
+                if (task.success) break;
+                retries++;
+            }
         }
 
         job.status = JobStatus.COMPLETED;
