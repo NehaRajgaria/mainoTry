@@ -19,20 +19,22 @@ public class YouTubeUploadService {
 
     public void upload(VideoTask task) {
         try {
-            File videoFile = VideoDownloader.download(task.videoUrl);
+            // Validate task parameters
+            task.validate();
+            File videoFile = VideoDownloader.download(task.getVideoUrl());
 
-            task.youtubeVideoId = youTubeClient.upload(
+            task.setYoutubeVideoId(youTubeClient.upload(
                     videoFile,
-                    task.title,
-                    task.description,
-                    task.privacyStatus,
-                    task.tags
-            );
-            task.success = true;
+                    task.getTitle(),
+                    task.getDescription(),
+                    task.getPrivacyStatus(),
+                    task.getTags()
+            ));
+            task.setSuccess(true);
 
         } catch (Exception e) {
-            task.success = false;
-            task.errorMessage = e.getMessage();
+            task.setSuccess(false);
+            task.setErrorMessage(e.getMessage());
         }
     }
 }

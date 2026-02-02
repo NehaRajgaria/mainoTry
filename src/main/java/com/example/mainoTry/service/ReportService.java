@@ -1,29 +1,35 @@
 package com.example.mainoTry.service;
 
+import com.example.mainoTry.model.Report;
 import com.example.mainoTry.model.UploadJob;
+import com.example.mainoTry.model.VideoTask;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ReportService {
 
-    public String generateReport(UploadJob job) {
-        List<String> successList = job.videos.stream()
-                .filter(task -> task.success)
-                .map(task -> "Video: " + task.title + " - Status: Success")
-                .collect(Collectors.toList());
+    public Report generateReport(UploadJob job) {
+        // Count statistics
+        int totalVideos = job.getVideos().size();
+        List<VideoTask> successfulTasks = job.getVideos().stream()
+                .filter(VideoTask::isSuccess)
+                .toList();
+        List<VideoTask> failedTasks = job.getVideos().stream()
+                .filter(task -> !task.isSuccess())
+                .toList();
 
-        List<String> failureList = job.videos.stream()
-                .filter(task -> !task.success)
-                .map(task -> "Video: " + task.title + " - Status: Failed - Error: " + task.errorMessage)
-                .collect(Collectors.toList());
+        // Populate the report
+        Report report = new Report();
+        report.setJobId(job.getJobId());
+        report.setStatus(job.getStatus().toString());
+        report.setTotalVideos(totalVideos);
+        report.setSuccessfulUploads(successfulTasks.size());
+        report.setFailedUploads(failedTasks.size());
 
-        return "Report for Job ID: " + job.jobId + "\n"
-                + "Total Videos: " + job.videos.size() + "\n"
-                + "Success: " + successList.size() + "\n"
-                + "Failed: " + failureList.size() + "\n\n"
-                + "Details:\n" + String.join("\n", successList) + "\n" + String.join("\n", failureList);
+        report.setTasks(job.getVideos()); // Include both successful and failed tasks
+
+        return report;
     }
 }

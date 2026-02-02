@@ -5,6 +5,7 @@ import org.apache.commons.csv.*;
 
 import org.springframework.stereotype.Service;
 import java.io.*;
+import java.net.URL;
 import java.util.*;
 
 @Service
@@ -19,18 +20,27 @@ public class CsvParserService {
 
         for (CSVRecord record : parser) {
             VideoTask task = new VideoTask();
-            task.title = record.get("title");
-            task.description = record.get("description");
-            task.videoUrl = record.get("video_url");
-            task.privacyStatus = record.get("privacy_status");
-            // ✅ Parse comma-separated tags
+            task.setTitle(record.get("title"));
+            task.setDescription(record.get("description"));
+            task.setVideoUrl(record.get("video_url"));
+            task.setPrivacyStatus(record.get("privacy_status"));
+            // Parse comma-separated tags
             String rawTags = record.get("tags");
-            task.tags = Arrays.stream(rawTags.split(","))
+            task.setTags(Arrays.stream(rawTags.split(","))
                     .map(String::trim)
                     .filter(s -> !s.isEmpty())
-                    .toList();
+                    .toList());
             tasks.add(task);
         }
         return tasks;
+    }
+
+    private boolean isValidUrl(String url) {
+        try {
+            new URL(url).toURI();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

@@ -22,31 +22,31 @@ public class JobService {
 
     public String createJob(List<VideoTask> tasks) {
         UploadJob job = new UploadJob();
-        job.videos = tasks;
-        jobs.put(job.jobId, job);
+        job.setVideos(tasks);
+        jobs.put(job.getJobId(), job);
 
         executor.submit(() -> process(job));
-        return job.jobId;
+        return job.getJobId();
     }
 
     private void process(UploadJob job) {
-        log.info("Job {} processing started with {} videos.", job.jobId, job.videos.size());
-        job.status = JobStatus.IN_PROGRESS;
+        log.info("Job {} processing started with {} videos.", job.getJobId(), job.getVideos().size());
+        job.setStatus(JobStatus.IN_PROGRESS);
 
-        for (VideoTask task : job.videos) {
+        for (VideoTask task : job.getVideos()) {
             int retryLimit = 3, retries = 0;
             while (retries < retryLimit) {
                 uploadService.upload(task);
-                if (task.success) {
-                    log.info("Video {} uploaded successfully.", task.title);
+                if (task.isSuccess()) {
+                    log.info("Video {} uploaded successfully.", task.getTitle());
                     break;
                 }
                 retries++;
-                log.info("Error processing video {} in try number {}.", task.title,  retries);
+                log.info("Error processing video {} in try number {}.", task.getTitle(),  retries);
             }
         }
-
-        job.status = JobStatus.COMPLETED;
+        log.info("Processing finished for job id - {}", job.getJobId());
+        job.setStatus(JobStatus.COMPLETED);
     }
 
     public UploadJob getJob(String jobId) {
