@@ -3,14 +3,17 @@ package com.example.mainoTry.service;
 import com.example.mainoTry.model.Report;
 import com.example.mainoTry.model.UploadJob;
 import com.example.mainoTry.model.VideoTask;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class ReportService {
 
     public Report generateReport(UploadJob job) {
+        log.info("Generating report for job {}", job.getJobId());
         // Count statistics
         int totalVideos = job.getVideos().size();
         List<VideoTask> successfulTasks = job.getVideos().stream()
@@ -29,7 +32,7 @@ public class ReportService {
         report.setFailedUploads(failedTasks.size());
 
         report.setTasks(job.getVideos()); // Include both successful and failed tasks
-
+        log.info("Report generated for job {}", job.getJobId());
         return report;
     }
 }

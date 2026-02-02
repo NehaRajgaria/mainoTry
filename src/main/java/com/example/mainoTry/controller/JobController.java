@@ -43,7 +43,11 @@ public class JobController {
 
     @GetMapping("/{jobId}")
     public UploadJob status(@PathVariable String jobId) {
-        return jobService.getJob(jobId);
+        UploadJob job = jobService.getJob(jobId);
+        if (job == null) {
+            throw new IllegalArgumentException("Job not found: " + jobId);
+        }
+        return job;
     }
 
     @GetMapping("/{jobId}/report")
